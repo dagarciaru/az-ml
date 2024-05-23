@@ -1,0 +1,38 @@
+name: 1.0.$(Date:yyyyMMdd)$(Rev:.rr)
+
+trigger:
+  branches:
+    include:
+      - dev
+
+pr:
+  branches:
+    include:
+      - dev
+
+variables:
+  AZURE_SERVICE_CONNECTION: 'FinAIPro_Desarrollo (7107c132-512a-4a4c-bbfd-9faacc45ad09)'
+  AZ_SUBSCRIPTION_NAME: 'FinAIPro_Desarrollo (7107c132-512a-4a4c-bbfd-9faacc45ad09)'
+  AZF_NAME: 'azf-finaipro-dev2-eu02'  
+
+
+pool: Azure Pipelines
+
+stages:
+- stage: Build
+  displayName: 'Build Stage'
+  jobs:
+  - job: Build
+    displayName: 'Build Job'
+    steps:
+    - script: |
+        echo "Building the project..."
+        mkdir -p $(Build.ArtifactStagingDirectory)
+        cp -R * $(Build.ArtifactStagingDirectory)/
+      displayName: 'Run build script'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'AZF Artifact'
+        publishLocation: 'Pipeline'
