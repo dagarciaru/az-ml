@@ -47,7 +47,7 @@ stages:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        artifactName: 'AZF_Artifact'
-        downloadPath: '$(Pipeline.Workspace)/AZF_Artifact'
+        artifactName: 'AZF Artifact'
+        downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
     
 
