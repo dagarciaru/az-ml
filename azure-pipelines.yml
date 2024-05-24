@@ -36,3 +36,23 @@ stages:
         targetPath: '$(Build.ArtifactStagingDirectory)'
         artifact: 'AZF Artifact'
         publishLocation: 'Pipeline'
+
+- stage: Deploy
+  dependsOn:
+    - Build
+  displayName: 'Deploy Stage'
+  jobs:
+  - job: DeployAzureFunctions
+    displayName: 'Deploy Azure Functions'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifactName: 'AZF Artifact'
+        downloadPath: '$(Pipeline.Workspace)'
+
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
+        appType: 'functionApp'
+        appName: '$(AZF_NAME)'
+        package: '$(Pipeline.Workspace)/AZF Artifact'
