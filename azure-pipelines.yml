@@ -15,8 +15,8 @@ variables:
   AZ_SUBSCRIPTION_NAME: 'FinAIPro_Desarrollo (7107c132-512a-4a4c-bbfd-9faacc45ad09)'
   AZF_NAME: 'azf-finaipro-dev2-eu02'  
 
-pool: 
-  vmImage: 'windows-latest'
+
+pool: Azure Pipelines
 
 stages:
 - stage: Build
@@ -27,32 +27,12 @@ stages:
     steps:
     - script: |
         echo "Building the project..."
-        mkdir -p $(Build.ArtifactStagingDirectory)/drop
-        cp -R * $(Build.ArtifactStagingDirectory)/drop/
+        mkdir -p $(Build.ArtifactStagingDirectory)
+        cp -R * $(Build.ArtifactStagingDirectory)/
       displayName: 'Run build script'
 
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/drop'
-        artifact: 'AZF_Artifact'
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'AZF Artifact'
         publishLocation: 'Pipeline'
-
-- stage: Deploy
-  dependsOn:
-    - Build
-  displayName: 'Deploy Stage'
-  jobs:
-  - job: DeployAzureFunctions
-    displayName: 'Deploy Azure Functions'
-    steps:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifactName: 'AZF_Artifact'
-        downloadPath: '$(Pipeline.Workspace)/AZF_Artifact'
-
-    - task: AzureFunctionApp@1
-      inputs:
-        azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
-        appType: 'functionApp'
-        appName: '$(AZF_NAME)'
-        package: '$(Pipeline.Workspace)/AZF_Artifact/drop'
