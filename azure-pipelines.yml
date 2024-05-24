@@ -50,4 +50,11 @@ stages:
         artifactName: 'AZF Artifact'
         downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
     
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
+        appType: 'functionApp'
+        appName: '$(AZF_NAME)'
+        package: '$(Pipeline.Workspace)/AZF Artifact'
+    
 
