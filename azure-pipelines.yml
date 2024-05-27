@@ -11,9 +11,7 @@ pr:
       - dev
 
 variables:
-  AZURE_SERVICE_CONNECTION: 'FinAIPro_Desarrollo (7107c132-512a-4a4c-bbfd-9faacc45ad09)'
-  AZ_SUBSCRIPTION_NAME: 'FinAIPro_Desarrollo (7107c132-512a-4a4c-bbfd-9faacc45ad09)'
-  AZF_NAME: 'azf-finaipro-dev2-eu02'  
+  - group: var-group-finaipro-azf-dev
 
 
 pool: Azure Pipelines
