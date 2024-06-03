@@ -13,7 +13,6 @@ pr:
 variables:
   - group: var-group-finaipro-azf-dev
 
-
 pool: Azure Pipelines
 
 stages:
@@ -29,12 +28,30 @@ stages:
         cp -R * $(Build.ArtifactStagingDirectory)/
       displayName: 'Run build script'
 
+    - script: |
+        echo "Copying environment variables..."
+        chmod +x copy_env_variables.sh
+        ./copy_env_variables.sh
+      displayName: 'Copiar variables de entorno'
+      env:
+        APPINSIGHTS_INSTRUMENTATIONKEY: 'f86f341d-c6d1-455a-86c6-198fe547d0d1'
+        AzureWebJobsFeatureFlags: 'IEnableWorkerIndexing'
+        DATALAKE_ACCESS_KEY: 's0W/Nt4VmatnSHSexmROUAdjTRlXBhBqRoITc0m7agtXUaBodm96lbIJ0S1IcZeS52hj4gZ7WoGP+ASt90XA/Q=='
+        DATALAKE_ACCOUNT_NAME: 'stdlfinaiprodeveu02m'
+        DATALAKE_CONTAINER_NAME: 'trading-economics-persistent-data'
+        DATALAKE_TARGET_BASE_FOLDER: 'trading_economics'
+        DATALAKE_TARGET_CONTAINER_NAME: 'raw'
+        KEYVAULT_URL: 'https://kv-finaipro-dev-eu02-m.vault.azure.net/'
+        TRADING_ECONOMICS_INDICATORS: '["CO1:COM", "SCO:COM", "XAGUSD:CUR", "XPTUSD:CUR", "HG1:COM", "XAUUSD:CUR", "SPSCFI:COM", "USGG2YR:IND", "USGG10YR:IND"]'
+       
+
+
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)'
         artifact: 'AZF Artifact'
         publishLocation: 'Pipeline'
-        
+
 - stage: Deploy
   dependsOn:
     - Build
@@ -54,5 +71,3 @@ stages:
         appType: 'functionApp'
         appName: '$(AZF_NAME)'
         package: '$(Pipeline.Workspace)/AZF Artifact'
-    
-
