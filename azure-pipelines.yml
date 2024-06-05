@@ -54,6 +54,12 @@ stages:
         downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
 
     - script: |
+        echo "Escaping JSON string for TRADING_ECONOMICS_INDICATORS..."
+        ESCAPED_TRADING_ECONOMICS_INDICATORS=$(echo '$(TRADING_ECONOMICS_INDICATORS)' | jq -R -s '.')
+        echo "##vso[task.setvariable variable=TRADING_ECONOMICS_INDICATORS_ESCAPED]$ESCAPED_TRADING_ECONOMICS_INDICATORS"
+      displayName: 'Escape JSON string'
+
+    - script: |
         echo "APPINSIGHTS_INSTRUMENTATIONKEY=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
         echo "AzureWebJobsFeatureFlags=$(AzureWebJobsFeatureFlags)"
         echo "DATALAKE_ACCESS_KEY=$(DATALAKE_ACCESS_KEY)"
@@ -62,7 +68,7 @@ stages:
         echo "DATALAKE_TARGET_BASE_FOLDER=$(DATALAKE_TARGET_BASE_FOLDER)"
         echo "DATALAKE_TARGET_CONTAINER_NAME=$(DATALAKE_TARGET_CONTAINER_NAME)"
         echo "KEYVAULT_URL=$(KEYVAULT_URL)"
-        echo "TRADING_ECONOMICS_INDICATORS=$(TRADING_ECONOMICS_INDICATORS)"
+        echo "TRADING_ECONOMICS_INDICATORS_ESCAPED=$(TRADING_ECONOMICS_INDICATORS_ESCAPED)"
       displayName: 'Echo environment variables'
 
     - task: AzureFunctionApp@1
@@ -84,8 +90,3 @@ stages:
             { "name": "KEYVAULT_URL", "value": "$(KEYVAULT_URL)" },
             { "name": "TRADING_ECONOMICS_INDICATORS", "value": "$(TRADING_ECONOMICS_INDICATORS_ESCAPED)" }
           ]
-
-    - script: |
-        echo "Escaping JSON string for TRADING_ECONOMICS_INDICATORS..."
-        echo "##vso[task.setvariable variable=TRADING_ECONOMICS_INDICATORS_ESCAPED]$(echo '$(TRADING_ECONOMICS_INDICATORS)' | jq -R -s '.')"
-      displayName: 'Escape JSON string'
