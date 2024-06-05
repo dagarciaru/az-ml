@@ -59,7 +59,7 @@ stages:
           appType: 'functionApp'
           appName: '$(AZF_NAME)'
           package: '$(Pipeline.Workspace)/AZF Artifact'
-          runtimeStack: 'DOTNET|6'
+          runtimeStack: 'DOTNET|6.0'
           appSettings: |
             APPINSIGHTS_INSTRUMENTATIONKEY=$(APPINSIGHTS_INSTRUMENTATIONKEY)
             AzureWebJobsFeatureFlags=$(AzureWebJobsFeatureFlags)
