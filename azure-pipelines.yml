@@ -54,15 +54,15 @@ stages:
         downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
 
     - script: |
-        echo "APPINSIGHTS_INSTRUMENTATIONKEY=$(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)"
-        echo "AzureWebJobsFeatureFlags=$(appSetting_AzureWebJobsFeatureFlags)"
-        echo "DATALAKE_ACCESS_KEY=$(appSetting_DATALAKE_ACCESS_KEY)"
-        echo "DATALAKE_ACCOUNT_NAME=$(appSetting_DATALAKE_ACCOUNT_NAME)"
-        echo "DATALAKE_CONTAINER_NAME=$(appSetting_DATALAKE_CONTAINER_NAME)"
-        echo "DATALAKE_TARGET_BASE_FOLDER=$(appSetting_DATALAKE_TARGET_BASE_FOLDER)"
-        echo "DATALAKE_TARGET_CONTAINER_NAME=$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)"
-        echo "KEYVAULT_URL=$(appSetting_KEYVAULT_URL)"
-        echo "TRADING_ECONOMICS_INDICATORS=$(appSetting_TRADING_ECONOMICS_INDICATORS)"
+        echo "APPINSIGHTS_INSTRUMENTATIONKEY=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+        echo "AzureWebJobsFeatureFlags=$(AzureWebJobsFeatureFlags)"
+        echo "DATALAKE_ACCESS_KEY=$(DATALAKE_ACCESS_KEY)"
+        echo "DATALAKE_ACCOUNT_NAME=$(DATALAKE_ACCOUNT_NAME)"
+        echo "DATALAKE_CONTAINER_NAME=$(DATALAKE_CONTAINER_NAME)"
+        echo "DATALAKE_TARGET_BASE_FOLDER=$(DATALAKE_TARGET_BASE_FOLDER)"
+        echo "DATALAKE_TARGET_CONTAINER_NAME=$(DATALAKE_TARGET_CONTAINER_NAME)"
+        echo "KEYVAULT_URL=$(KEYVAULT_URL)"
+        echo "TRADING_ECONOMICS_INDICATORS=$(TRADING_ECONOMICS_INDICATORS)"
       displayName: 'Echo environment variables'
 
     - task: AzureFunctionApp@1
@@ -74,13 +74,18 @@ stages:
         runtimeStack: 'DOTNET|6.0'
         appSettings: |
           [
-            { "name": "APPINSIGHTS_INSTRUMENTATIONKEY", "value": "$(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)" },
-            { "name": "AzureWebJobsFeatureFlags", "value": "$(appSetting_AzureWebJobsFeatureFlags)" },
-            { "name": "DATALAKE_ACCESS_KEY", "value": "$(appSetting_DATALAKE_ACCESS_KEY)" },
-            { "name": "DATALAKE_ACCOUNT_NAME", "value": "$(appSetting_DATALAKE_ACCOUNT_NAME)" },
-            { "name": "DATALAKE_CONTAINER_NAME", "value": "$(appSetting_DATALAKE_CONTAINER_NAME)" },
-            { "name": "DATALAKE_TARGET_BASE_FOLDER", "value": "$(appSetting_DATALAKE_TARGET_BASE_FOLDER)" },
-            { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)" },
-            { "name": "KEYVAULT_URL", "value": "$(appSetting_KEYVAULT_URL)" },
-            { "name": "TRADING_ECONOMICS_INDICATORS", "value": "$(appSetting_TRADING_ECONOMICS_INDICATORS)" }
+            { "name": "APPINSIGHTS_INSTRUMENTATIONKEY", "value": "$(APPINSIGHTS_INSTRUMENTATIONKEY)" },
+            { "name": "AzureWebJobsFeatureFlags", "value": "$(AzureWebJobsFeatureFlags)" },
+            { "name": "DATALAKE_ACCESS_KEY", "value": "$(DATALAKE_ACCESS_KEY)" },
+            { "name": "DATALAKE_ACCOUNT_NAME", "value": "$(DATALAKE_ACCOUNT_NAME)" },
+            { "name": "DATALAKE_CONTAINER_NAME", "value": "$(DATALAKE_CONTAINER_NAME)" },
+            { "name": "DATALAKE_TARGET_BASE_FOLDER", "value": "$(DATALAKE_TARGET_BASE_FOLDER)" },
+            { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(DATALAKE_TARGET_CONTAINER_NAME)" },
+            { "name": "KEYVAULT_URL", "value": "$(KEYVAULT_URL)" },
+            { "name": "TRADING_ECONOMICS_INDICATORS", "value": "$(TRADING_ECONOMICS_INDICATORS_ESCAPED)" }
           ]
+
+    - script: |
+        echo "Escaping JSON string for TRADING_ECONOMICS_INDICATORS..."
+        echo "##vso[task.setvariable variable=TRADING_ECONOMICS_INDICATORS_ESCAPED]$(echo '$(TRADING_ECONOMICS_INDICATORS)' | jq -R -s '.')"
+      displayName: 'Escape JSON string'
