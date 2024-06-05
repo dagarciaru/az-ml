@@ -61,4 +61,4 @@ stages:
         package: '$(Pipeline.Workspace)/AZF Artifact'
         runtimeStack: 'DOTNET|6'
         appSettings: |
-          APPINSIGHTS_INSTRUMENTATIONKEY: $(APPINSIGHTS_INSTRUMENTATIONKEY)
+          APPINSIGHTS_INSTRUMENTATIONKEY=$(APPINSIGHTS_INSTRUMENTATIONKEY)
