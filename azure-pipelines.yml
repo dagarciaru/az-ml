@@ -72,7 +72,7 @@ stages:
         appName: '$(AZF_NAME)'
         package: '$(Pipeline.Workspace)/AZF Artifact'
         runtimeStack: 'DOTNET|6.0'
-        appSettings: | 
+        appSettings: |
           - name: APPINSIGHTS_INSTRUMENTATIONKEY
             value: $(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)
           - name: AzureWebJobsFeatureFlags
@@ -90,4 +90,4 @@ stages:
           - name: KEYVAULT_URL
             value: $(appSetting_KEYVAULT_URL)
           - name: TRADING_ECONOMICS_INDICATORS
-            value: $([System.String]::Join(',', $(appSetting_TRADING_ECONOMICS_INDICATORS)))
+            value: '["CO1:COM", "SCO:COM", "XAGUSD:CUR", "XPTUSD:CUR", "HG1:COM", "XAUUSD:CUR", "SPSCFI:COM", "USGG2YR:IND", "USGG10YR:IND"]'
