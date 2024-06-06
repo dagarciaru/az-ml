@@ -72,7 +72,7 @@ stages:
         appName: '$(AZF_NAME)'
         package: '$(Pipeline.Workspace)/AZF Artifact'
         runtimeStack: 'DOTNET|6.0'
-        appSettings: |
+        appSettings: | 
           - name: APPINSIGHTS_INSTRUMENTATIONKEY
             value: $(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)
             slotSetting: false
