@@ -55,7 +55,7 @@ stages:
 
     - script: |
         echo "Escaping JSON string for TRADING_ECONOMICS_INDICATORS..."
-        ESCAPED_TRADING_ECONOMICS_INDICATORS=$(echo '$(TRADING_ECONOMICS_INDICATORS)' | jq -R -s '.')
+        ESCAPED_TRADING_ECONOMICS_INDICATORS=$(echo '$(TRADING_ECONOMICS_INDICATORS)' | jq -aRs .)
         echo "##vso[task.setvariable variable=TRADING_ECONOMICS_INDICATORS_ESCAPED]$ESCAPED_TRADING_ECONOMICS_INDICATORS"
       displayName: 'Escape JSON string'
 
@@ -88,5 +88,5 @@ stages:
             { "name": "DATALAKE_TARGET_BASE_FOLDER", "value": "$(DATALAKE_TARGET_BASE_FOLDER)" },
             { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(DATALAKE_TARGET_CONTAINER_NAME)" },
             { "name": "KEYVAULT_URL", "value": "$(KEYVAULT_URL)" },
-            { "name": "TRADING_ECONOMICS_INDICATORS", "value": $(TRADING_ECONOMICS_INDICATORS_ESCAPED) }
+            { "name": "TRADING_ECONOMICS_INDICATORS", "value": "$(TRADING_ECONOMICS_INDICATORS_ESCAPED)" }
           ]
