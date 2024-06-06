@@ -74,13 +74,13 @@ stages:
         runtimeStack: 'DOTNET|6.0'
         appSettings: |
           [
-            { "name": "APPINSIGHTS_INSTRUMENTATIONKEY", "value": "$(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)", "slotSetting": false },
-            { "name": "AzureWebJobsFeatureFlags", "value": "$(appSetting_AzureWebJobsFeatureFlags)", "slotSetting": false },
-            { "name": "DATALAKE_ACCESS_KEY", "value": "$(appSetting_DATALAKE_ACCESS_KEY)", "slotSetting": false },
-            { "name": "DATALAKE_ACCOUNT_NAME", "value": "$(appSetting_DATALAKE_ACCOUNT_NAME)", "slotSetting": false },
-            { "name": "DATALAKE_CONTAINER_NAME", "value": "$(appSetting_DATALAKE_CONTAINER_NAME)", "slotSetting": false },
-            { "name": "DATALAKE_TARGET_BASE_FOLDER", "value": "$(appSetting_DATALAKE_TARGET_BASE_FOLDER)", "slotSetting": false },
-            { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)", "slotSetting": false },
-            { "name": "KEYVAULT_URL", "value": "$(appSetting_KEYVAULT_URL)", "slotSetting": false },
-            { "name": "TRADING_ECONOMICS_INDICATORS", "value": "[\"CO1:COM\", \"SCO:COM\", \"XAGUSD:CUR\", \"XPTUSD:CUR\", \"HG1:COM\", \"XAUUSD:CUR\", \"SPSCFI:COM\", \"USGG2YR:IND\", \"USGG10YR:IND\"]", "slotSetting": false }
+            { "name": APPINSIGHTS_INSTRUMENTATIONKEY, "value": $(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY), "slotSetting": false },
+            { "name": AzureWebJobsFeatureFlags, "value": $(appSetting_AzureWebJobsFeatureFlags), "slotSetting": false },
+            { "name": DATALAKE_ACCESS_KEY, "value": $(appSetting_DATALAKE_ACCESS_KEY), "slotSetting": false },
+            { "name": DATALAKE_ACCOUNT_NAME, "value": $(appSetting_DATALAKE_ACCOUNT_NAME), "slotSetting": false },
+            { "name": DATALAKE_CONTAINER_NAME, "value": $(appSetting_DATALAKE_CONTAINER_NAME), "slotSetting": false },
+            { "name": DATALAKE_TARGET_BASE_FOLDER, "value": $(appSetting_DATALAKE_TARGET_BASE_FOLDER), "slotSetting": false },
+            { "name": DATALAKE_TARGET_CONTAINER_NAME, "value": $(appSetting_DATALAKE_TARGET_CONTAINER_NAME), "slotSetting": false },
+            { "name": KEYVAULT_URL, "value": $(appSetting_KEYVAULT_URL), "slotSetting": false },
+            { "name": TRADING_ECONOMICS_INDICATORS, "value": [\"CO1:COM\", \"SCO:COM\", \"XAGUSD:CUR\", \"XPTUSD:CUR\", \"HG1:COM\", \"XAUUSD:CUR\", \"SPSCFI:COM\", \"USGG2YR:IND\", \"USGG10YR:IND\"], "slotSetting": false }
           ]
