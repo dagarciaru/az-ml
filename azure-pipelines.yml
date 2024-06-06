@@ -87,4 +87,5 @@ stages:
           - name: DATALAKE_TARGET_CONTAINER_NAME
             value: $(appSetting_DATALAKE_TARGET_CONTAINER_NAME)
           - name: KEYVAULT_URL
+            value: false
             value: $(appSetting_KEYVAULT_URL)
