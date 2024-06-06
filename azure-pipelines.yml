@@ -62,7 +62,6 @@ stages:
         echo "DATALAKE_TARGET_BASE_FOLDER=$(appSetting_DATALAKE_TARGET_BASE_FOLDER)"
         echo "DATALAKE_TARGET_CONTAINER_NAME=$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)"
         echo "KEYVAULT_URL=$(appSetting_KEYVAULT_URL)"
-        echo "TRADING_ECONOMICS_INDICATORS=$(appSetting_TRADING_ECONOMICS_INDICATORS)"
       displayName: 'Echo environment variables'
 
     - task: AzureFunctionApp@1
@@ -89,5 +88,3 @@ stages:
             value: $(appSetting_DATALAKE_TARGET_CONTAINER_NAME)
           - name: KEYVAULT_URL
             value: $(appSetting_KEYVAULT_URL)
-          - name: TRADING_ECONOMICS_INDICATORS
-            value: $(appSetting_TRADING_ECONOMICS_INDICATORS)
