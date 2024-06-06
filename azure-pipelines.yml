@@ -62,6 +62,7 @@ stages:
         echo "DATALAKE_TARGET_BASE_FOLDER=$(appSetting_DATALAKE_TARGET_BASE_FOLDER)"
         echo "DATALAKE_TARGET_CONTAINER_NAME=$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)"
         echo "KEYVAULT_URL=$(appSetting_KEYVAULT_URL)"
+        echo "TRADING_ECONOMICS_INDICATORS=$(appSetting_TRADING_ECONOMICS_INDICATORS)"
       displayName: 'Echo environment variables'
 
     - task: AzureFunctionApp@1
@@ -71,21 +72,15 @@ stages:
         appName: '$(AZF_NAME)'
         package: '$(Pipeline.Workspace)/AZF Artifact'
         runtimeStack: 'DOTNET|6.0'
-        appSettings: | 
-          - name: APPINSIGHTS_INSTRUMENTATIONKEY
-            value: $(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)
-          - name: AzureWebJobsFeatureFlags
-            value: $(appSetting_AzureWebJobsFeatureFlags)
-          - name: DATALAKE_ACCESS_KEY
-            value: $(appSetting_DATALAKE_ACCESS_KEY)
-          - name: DATALAKE_ACCOUNT_NAME
-            value: $(appSetting_DATALAKE_ACCOUNT_NAME)
-          - name: DATALAKE_CONTAINER_NAME
-            value: $(appSetting_DATALAKE_CONTAINER_NAME)
-          - name: DATALAKE_TARGET_BASE_FOLDER
-            value: $(appSetting_DATALAKE_TARGET_BASE_FOLDER)
-          - name: DATALAKE_TARGET_CONTAINER_NAME
-            value: $(appSetting_DATALAKE_TARGET_CONTAINER_NAME)
-          - name: KEYVAULT_URL
-            value: false
-            value: $(appSetting_KEYVAULT_URL)
+        appSettings: |
+          [
+            { "name": "APPINSIGHTS_INSTRUMENTATIONKEY", "value": "$(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)", "slotSetting": false },
+            { "name": "AzureWebJobsFeatureFlags", "value": "$(appSetting_AzureWebJobsFeatureFlags)", "slotSetting": false },
+            { "name": "DATALAKE_ACCESS_KEY", "value": "$(appSetting_DATALAKE_ACCESS_KEY)", "slotSetting": false },
+            { "name": "DATALAKE_ACCOUNT_NAME", "value": "$(appSetting_DATALAKE_ACCOUNT_NAME)", "slotSetting": false },
+            { "name": "DATALAKE_CONTAINER_NAME", "value": "$(appSetting_DATALAKE_CONTAINER_NAME)", "slotSetting": false },
+            { "name": "DATALAKE_TARGET_BASE_FOLDER", "value": "$(appSetting_DATALAKE_TARGET_BASE_FOLDER)", "slotSetting": false },
+            { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)", "slotSetting": false },
+            { "name": "KEYVAULT_URL", "value": "$(appSetting_KEYVAULT_URL)", "slotSetting": false },
+            { "name": "TRADING_ECONOMICS_INDICATORS", "value": "(["CO1:COM", "SCO:COM", "XAGUSD:CUR", "XPTUSD:CUR", "HG1:COM", "XAUUSD:CUR", "SPSCFI:COM", "USGG2YR:IND", "USGG10YR:IND"])", "slotSetting": false }
+          ]
