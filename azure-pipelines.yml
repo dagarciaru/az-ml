@@ -1,99 +1,102 @@
 name: 1.0.$(Date:yyyyMMdd)$(Rev:.rr)
 
 trigger:
-  - dev
+  branches:
+    include:
+      - dev
 
 pr:
-  - dev
+  branches:
+    include:
+      - dev
 
 variables:
   - group: var-group-finaipro-azf-dev
 
-pool:
-  Azure Pipelines
+pool: Azure Pipelines
 
 stages:
-  - stage: Build
-    displayName: 'Etapa de compilación'
-    jobs:
-      - job: Build
-        displayName: 'Trabajo de compilación'
-        steps:
-          - script: |
-              echo "Compilando el proyecto..."
-              mkdir -p $(Build.ArtifactStagingDirectory)
-              cp -R * $(Build.ArtifactStagingDirectory)/
-            displayName: 'Ejecutar script de compilación'
+- stage: Build
+  displayName: 'Build Stage'
+  jobs:
+  - job: Build
+    displayName: 'Build Job'
+    steps:
+    - script: |
+        echo "Building the project..."
+        mkdir -p $(Build.ArtifactStagingDirectory)
+        cp -R * $(Build.ArtifactStagingDirectory)/
+      displayName: 'Run build script'
 
-          - script: |
-              echo "Copiando variables de entorno..."
-              chmod +x copy_env_variables.sh
-              ./copy_env_variables.sh
-            displayName: 'Copiar variables de entorno'
+    - script: |
+        echo "Copying environment variables..."
+        chmod +x copy_env_variables.sh
+        ./copy_env_variables.sh
+      displayName: 'Copiar variables de entorno'
 
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)'
-              artifact: 'AZF Artifact'
-              publishLocation: 'Pipeline'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'AZF Artifact'
+        publishLocation: 'Pipeline'
 
-  - stage: Deploy
-    dependsOn:
-      - Build
-    displayName: 'Etapa de implementación'
-    jobs:
-      - job: DeployAzureFunctions
-        displayName: 'Implementar funciones de Azure'
-        steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifactName: 'AZF Artifact'
-              downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
+- stage: Deploy
+  dependsOn:
+    - Build
+  displayName: 'Deploy Stage'
+  jobs:
+  - job: DeployAzureFunctions
+    displayName: 'Deploy Azure Functions'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifactName: 'AZF Artifact'
+        downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
 
-          - script: |
-              echo "APPINSIGHTS_INSTRUMENTATIONKEY=$(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)"
-              echo "AzureWebJobsFeatureFlags=$(appSetting_AzureWebJobsFeatureFlags)"
-              echo "DATALAKE_ACCESS_KEY=$(appSetting_DATALAKE_ACCESS_KEY)"
-              echo "DATALAKE_ACCOUNT_NAME=$(appSetting_DATALAKE_ACCOUNT_NAME)"
-              echo "DATALAKE_CONTAINER_NAME=$(appSetting_DATALAKE_CONTAINER_NAME)"
-              echo "DATALAKE_TARGET_BASE_FOLDER=$(appSetting_DATALAKE_TARGET_BASE_FOLDER)"
-              echo "DATALAKE_TARGET_CONTAINER_NAME=$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)"
-              echo "KEYVAULT_URL=$(appSetting_KEYVAULT_URL)"
-              echo "TRADING_ECONOMICS_INDICATORS=$(appSetting_TRADING_ECONOMICS_INDICATORS)"
-            displayName: 'Mostrar variables de entorno'
+    - script: |
+        echo "APPINSIGHTS_INSTRUMENTATIONKEY=$(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)"
+        echo "AzureWebJobsFeatureFlags=$(appSetting_AzureWebJobsFeatureFlags)"
+        echo "DATALAKE_ACCESS_KEY=$(appSetting_DATALAKE_ACCESS_KEY)"
+        echo "DATALAKE_ACCOUNT_NAME=$(appSetting_DATALAKE_ACCOUNT_NAME)"
+        echo "DATALAKE_CONTAINER_NAME=$(appSetting_DATALAKE_CONTAINER_NAME)"
+        echo "DATALAKE_TARGET_BASE_FOLDER=$(appSetting_DATALAKE_TARGET_BASE_FOLDER)"
+        echo "DATALAKE_TARGET_CONTAINER_NAME=$(appSetting_DATALAKE_TARGET_CONTAINER_NAME)"
+        echo "KEYVAULT_URL=$(appSetting_KEYVAULT_URL)"
+        echo "TRADING_ECONOMICS_INDICATORS=$(appSetting_TRADING_ECONOMICS_INDICATORS)"
+      displayName: 'Echo environment variables'
 
-          - task: AzureFunctionApp@1
-            inputs:
-              azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
-              appType: 'functionApp'
-              appName: '$(AZF_NAME)'
-              package: '$(Pipeline.Workspace)/AZF Artifact'
-              runtimeStack: 'DOTNET|6.0'
-              appSettings: |
-                - name: APPINSIGHTS_INSTRUMENTATIONKEY
-                  value: $(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)
-                  slotSetting: false
-                - name: AzureWebJobsFeatureFlags
-                  value: $(appSetting_AzureWebJobsFeatureFlags)
-                  slotSetting: false
-                - name: DATALAKE_ACCESS_KEY
-                  value: $(appSetting_DATALAKE_ACCESS_KEY)
-                  slotSetting: false
-                - name: DATALAKE_ACCOUNT_NAME
-                  value: $(appSetting_DATALAKE_ACCOUNT_NAME)
-                  slotSetting: false
-                - name: DATALAKE_CONTAINER_NAME
-                  value: $(appSetting_DATALAKE_CONTAINER_NAME)
-                  slotSetting: false
-                - name: DATALAKE_TARGET_BASE_FOLDER
-                  value: $(appSetting_DATALAKE_TARGET_BASE_FOLDER)
-                  slotSetting: false
-                - name: DATALAKE_TARGET_CONTAINER_NAME
-                  value: $(appSetting_DATALAKE_TARGET_CONTAINER_NAME)
-                  slotSetting: false
-                - name: KEYVAULT_URL
-                  value: $(appSetting_KEYVAULT_URL)
-                  slotSetting: false
-                - name: TRADING_ECONOMICS_INDICATORS
-                  value: $(appSetting_TRADING_ECONOMICS_INDICATORS)
-                  slotSetting: false
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
+        appType: 'functionApp'
+        appName: '$(AZF_NAME)'
+        package: '$(Pipeline.Workspace)/AZF Artifact'
+        runtimeStack: 'DOTNET|6.0'
+        appSettings: |
+          - name: APPINSIGHTS_INSTRUMENTATIONKEY
+            value: $(appSetting_APPINSIGHTS_INSTRUMENTATIONKEY)
+            slotSetting: false
+          - name: AzureWebJobsFeatureFlags
+            value: $(appSetting_AzureWebJobsFeatureFlags)
+            slotSetting: false
+          - name: DATALAKE_ACCESS_KEY
+            value: $(appSetting_DATALAKE_ACCESS_KEY)
+            slotSetting: false
+          - name: DATALAKE_ACCOUNT_NAME
+            value: $(appSetting_DATALAKE_ACCOUNT_NAME)
+            slotSetting: false
+          - name: DATALAKE_CONTAINER_NAME
+            value: $(appSetting_DATALAKE_CONTAINER_NAME)
+            slotSetting: false
+          - name: DATALAKE_TARGET_BASE_FOLDER
+            value: $(appSetting_DATALAKE_TARGET_BASE_FOLDER)
+            slotSetting: false
+          - name: DATALAKE_TARGET_CONTAINER_NAME
+            value: $(appSetting_DATALAKE_TARGET_CONTAINER_NAME)
+            slotSetting: false
+          - name: KEYVAULT_URL
+            value: $(appSetting_KEYVAULT_URL)
+            slotSetting: false
+          - name: TRADING_ECONOMICS_INDICATORS
+            value: '["CO1:COM", "SCO:COM", "XAGUSD:CUR", "XPTUSD:CUR", "HG1:COM", "XAUUSD:CUR", "SPSCFI:COM", "USGG2YR:IND", "USGG10YR:IND"]'
+            slotSetting: false
