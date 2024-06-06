@@ -90,3 +90,4 @@ stages:
             { "name": "KEYVAULT_URL", "value": "$(KEYVAULT_URL)" },
             { "name": "TRADING_ECONOMICS_INDICATORS", "value": $(TRADING_ECONOMICS_INDICATORS_ESCAPED) }
           ]
+
