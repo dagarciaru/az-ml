@@ -73,7 +73,6 @@ stages:
         package: '$(Pipeline.Workspace)/AZF Artifact'
         runtimeStack: 'DOTNET|6.0'
         appSettings: |
-          [
             { "name": "APPINSIGHTS_INSTRUMENTATIONKEY", "value": "$(APPINSIGHTS_INSTRUMENTATIONKEY)", "slotSetting": false },
             { "name": "AzureWebJobsFeatureFlags", "value": "$(AzureWebJobsFeatureFlags)", "slotSetting": false },
             { "name": "DATALAKE_ACCESS_KEY", "value": "$(DATALAKE_ACCESS_KEY)", "slotSetting": false },
@@ -83,4 +82,4 @@ stages:
             { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(DATALAKE_TARGET_CONTAINER_NAME)", "slotSetting": false },
             { "name": "KEYVAULT_URL", "value": "$(KEYVAULT_URL)", "slotSetting": false },
             { "name": "TRADING_ECONOMICS_INDICATORS", "value": "[\"CO1:COM\", \"SCO:COM\", \"XAGUSD:CUR\", \"XPTUSD:CUR\", \"HG1:COM\", \"XAUUSD:CUR\", \"SPSCFI:COM\", \"USGG2YR:IND\", \"USGG10YR:IND\"]", "slotSetting": false }
-          ]
+          
