@@ -11,7 +11,7 @@ pr:
       - dev
 
 variables:
-  - group: var-group-finaipro-azf-dev
+  - group: var-group-finaipro-cosmos-dev
 
 pool: Azure Pipelines
 
@@ -27,59 +27,69 @@ stages:
         mkdir -p $(Build.ArtifactStagingDirectory)
         cp -R * $(Build.ArtifactStagingDirectory)/
       displayName: 'Run build script'
-
-    - script: |
-        echo "Copying environment variables..."
-        chmod +x copy_env_variables.sh
-        ./copy_env_variables.sh
-      displayName: 'Copiar variables de entorno'
-
+    
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)'
-        artifact: 'AZF Artifact'
+        artifact: 'Cosmos Artifact'
         publishLocation: 'Pipeline'
 
 - stage: Deploy
-  dependsOn:
-    - Build
   displayName: 'Deploy Stage'
   jobs:
-  - job: DeployAzureFunctions
-    displayName: 'Deploy Azure Functions'
+  - job: Deploy
+    displayName: 'Deploy Job'
     steps:
-    - task: DownloadPipelineArtifact@2
+    - download: current
+      artifact: 'Cosmos Artifact'
+    
+    - task: AzureCLI@2
+      displayName: 'Login to Azure'
       inputs:
-        artifactName: 'AZF Artifact'
-        downloadPath: '$(Pipeline.Workspace)/AZF Artifact'
-
-    - script: |
-        echo "APPINSIGHTS_INSTRUMENTATIONKEY=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
-        echo "AzureWebJobsFeatureFlags=$(AzureWebJobsFeatureFlags)"
-        echo "DATALAKE_ACCESS_KEY=$(DATALAKE_ACCESS_KEY)"
-        echo "DATALAKE_ACCOUNT_NAME=$(DATALAKE_ACCOUNT_NAME)"
-        echo "DATALAKE_CONTAINER_NAME=$(DATALAKE_CONTAINER_NAME)"
-        echo "DATALAKE_TARGET_BASE_FOLDER=$(DATALAKE_TARGET_BASE_FOLDER)"
-        echo "DATALAKE_TARGET_CONTAINER_NAME=$(DATALAKE_TARGET_CONTAINER_NAME)"
-        echo "KEYVAULT_URL=$(KEYVAULT_URL)"
-        echo "TRADING_ECONOMICS_INDICATORS=$(TRADING_ECONOMICS_INDICATORS)"
-      displayName: 'Echo environment variables'
-
-    - task: AzureFunctionApp@1
+        azureSubscription: $(AZURE_SERVICE_CONNECTION)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Logged in to Azure"
+    
+    - task: AzureCLI@2
+      displayName: 'Create Cosmos DB Account'
       inputs:
-        azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
-        appType: 'functionApp'
-        appName: '$(AZF_NAME)'
-        package: '$(Pipeline.Workspace)/AZF Artifact'
-        runtimeStack: 'DOTNET|6.0'
-        appSettings: |
-            { "name": "APPINSIGHTS_INSTRUMENTATIONKEY", "value": "$(APPINSIGHTS_INSTRUMENTATIONKEY)", "slotSetting": false },
-            { "name": "AzureWebJobsFeatureFlags", "value": "$(AzureWebJobsFeatureFlags)", "slotSetting": false },
-            { "name": "DATALAKE_ACCESS_KEY", "value": "$(DATALAKE_ACCESS_KEY)", "slotSetting": false },
-            { "name": "DATALAKE_ACCOUNT_NAME", "value": "$(DATALAKE_ACCOUNT_NAME)", "slotSetting": false },
-            { "name": "DATALAKE_CONTAINER_NAME", "value": "$(DATALAKE_CONTAINER_NAME)", "slotSetting": false },
-            { "name": "DATALAKE_TARGET_BASE_FOLDER", "value": "$(DATALAKE_TARGET_BASE_FOLDER)", "slotSetting": false },
-            { "name": "DATALAKE_TARGET_CONTAINER_NAME", "value": "$(DATALAKE_TARGET_CONTAINER_NAME)", "slotSetting": false },
-            { "name": "KEYVAULT_URL", "value": "$(KEYVAULT_URL)", "slotSetting": false },
-            { "name": "TRADING_ECONOMICS_INDICATORS", "value": "[\"CO1:COM\", \"SCO:COM\", \"XAGUSD:CUR\", \"XPTUSD:CUR\", \"HG1:COM\", \"XAUUSD:CUR\", \"SPSCFI:COM\", \"USGG2YR:IND\", \"USGG10YR:IND\"]", "slotSetting": false }
-          
+        azureSubscription: $(AZURE_SERVICE_CONNECTION)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az cosmosdb create \
+            --name $(COSMOS_ACC_NAME) \
+            --resource-group $(COSMOS_RG_NAME) \
+            --kind GlobalDocumentDB \
+            --locations regionName='East US 2' \
+            --default-consistency-level Session
+
+    - task: AzureCLI@2
+      displayName: 'Create Cosmos DB Containers'
+      inputs:
+        azureSubscription: $(AZURE_SERVICE_CONNECTION)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          cd $(Build.ArtifactStagingDirectory)/$(COSMOS_WORKING_FOLDER)
+          if [ ! -f $(COSMOS_CONTAINERS) ]; then
+            echo "Containers file not found!"
+            exit 1
+          fi
+          containers=$(jq -c '.[]' $(COSMOS_CONTAINERS))
+          echo "Containers to create: $containers"
+          container_name=$(jq -r '.[0].container_name' "$(COSMOS_CONTAINERS)")
+          echo "Contenedor a crear: $container_name"
+          echo $containers | while read container; do
+            name=$(echo $container | jq -r '.container_name')
+            partitionKey=$(echo $container | jq -r '.container_partitionKey')
+            echo "Creating container $name with partition key $partitionKey"
+            az cosmosdb sql container create \
+              --account-name $(COSMOS_ACC_NAME) \
+              --resource-group $(COSMOS_RG_NAME) \
+              --database-name $(COSMOS_DATABASE_NAME) \
+              --name $name \
+              --partition-key-path $partitionKey
+          done
