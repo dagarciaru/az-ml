@@ -43,53 +43,11 @@ stages:
     - download: current
       artifact: 'Cosmos Artifact'
     
-    - task: AzureCLI@2
-      displayName: 'Login to Azure'
+    - task: AzureFunctionApp@1
+      displayName: 'Deploy to Azure Function App'
       inputs:
         azureSubscription: $(AZURE_SERVICE_CONNECTION)
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          echo "Logged in to Azure"
-    
-    - task: AzureCLI@2
-      displayName: 'Create Cosmos DB Account'
-      inputs:
-        azureSubscription: $(AZURE_SERVICE_CONNECTION)
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          az cosmosdb create \
-            --name $(COSMOS_ACC_NAME) \
-            --resource-group $(COSMOS_RG_NAME) \
-            --kind GlobalDocumentDB \
-            --locations regionName='East US 2' \
-            --default-consistency-level Session
+        appType: functionAppLinux
+        appName: 'azf-finaipro-dev2-eu02'
+        package: '$(Pipeline.Workspace)/Cosmos Artifact/http_triggers'
 
-    - task: AzureCLI@2
-      displayName: 'Create Cosmos DB Containers'
-      inputs:
-        azureSubscription: $(AZURE_SERVICE_CONNECTION)
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          cd $(Build.ArtifactStagingDirectory)/$(COSMOS_WORKING_FOLDER)
-          if [ ! -f $(COSMOS_CONTAINERS) ]; then
-            echo "Containers file not found!"
-            exit 1
-          fi
-          containers=$(jq -c '.[]' $(COSMOS_CONTAINERS))
-          echo "Containers to create: $containers"
-          container_name=$(jq -r '.[0].container_name' "$(COSMOS_CONTAINERS)")
-          echo "Contenedor a crear: $container_name"
-          echo $containers | while read container; do
-            name=$(echo $container | jq -r '.container_name')
-            partitionKey=$(echo $container | jq -r '.container_partitionKey')
-            echo "Creating container $name with partition key $partitionKey"
-            az cosmosdb sql container create \
-              --account-name $(COSMOS_ACC_NAME) \
-              --resource-group $(COSMOS_RG_NAME) \
-              --database-name $(COSMOS_DATABASE_NAME) \
-              --name $name \
-              --partition-key-path $partitionKey
-          done
