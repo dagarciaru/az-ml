@@ -9,7 +9,6 @@ def get_trading_economics_api_key():
     return get_secret('TRADING-ECONOMICS-API-KEY')
 
 def get_fred_api_key():
-    return '450e18ff67e5db27940b11c9e3c491de'
     return get_secret('FRED-API-KEY')
 
 def get_trading_economics_indicators_to_request():

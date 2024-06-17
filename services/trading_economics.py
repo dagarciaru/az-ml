@@ -39,10 +39,7 @@ def get_indicators_info(indicators_symbols):
 def get_indicator_historical_fred_series(serie_id, init_date = None, end_date = None):
     logging.info(f'calling TE for {serie_id} between {init_date} and {end_date}')
     
-    gdp_info = fred.get_series_info(series_id="GDP")
     series = fred.get_series(serie_id, observation_start=init_date, observation_end=end_date)
-    
-    logging.info(f'calling TE for {gdp_info}')
     
     df = series.reset_index()
     df.columns = ['Date', 'Value']
