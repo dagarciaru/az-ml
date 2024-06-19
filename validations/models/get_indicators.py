@@ -40,13 +40,3 @@ class GetHistoricalHeaders(BaseModel):
         if not is_valid_date(date):
             raise ValueError(f'{validation_info.field_name} should be in the following format: YYYY-MM-DD')
         return date
-class GetHistoricalHeadersFred(BaseModel):
-    init_date: Optional[str] 
-    end_date: Optional[str] = ((date.today()) - timedelta(days=1)).strftime("%Y-%m-%d")
-
-    @field_validator('init_date', 'end_date')
-    @classmethod
-    def check_init_end_date_field(cls, date, validation_info):
-        if not is_valid_date(date):
-            raise ValueError(f'{validation_info.field_name} should be in the following format: YYYY-MM-DD')
-        return date

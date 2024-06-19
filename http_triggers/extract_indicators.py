@@ -1,11 +1,12 @@
 import json
 from os import environ
 import azure.functions as func
-from services.trading_economics import get_indicator_historical,get_indicator_historical_fred_series
+from services.trading_economics import get_indicator_historical
+from services.fred_economics import get_indicator_historical_fred_series
 
 import logging
 from validations.validators.http_validator import validate, ValidationType
-from validations.models.get_indicators import GetHistoricalHeaders, GetHistoricalHeadersFred, GetPathParam, GetDailyHeaders
+from validations.models.get_indicators import GetHistoricalHeaders, GetPathParam, GetDailyHeaders
 from utils.system import get_filename, get_trading_economics_indicators_to_request
 from utils.dataframes import get_dataframe, save_dataframe, update_dataframe, sort_dataframe_by_date
 from utils.exceptions import IndicatorException
@@ -136,7 +137,7 @@ def extract_indicator_daily(req: func.HttpRequest) -> func.HttpResponse:
 
 
 @blueprint_extract_indicators.route(route="fred/historical", auth_level=func.AuthLevel.ANONYMOUS)
-@validate(GetHistoricalHeadersFred, ValidationType.HEADERS)
+@validate(GetHistoricalHeaders, ValidationType.HEADERS)
 def extract_fred_historical(req: func.HttpRequest) -> func.HttpResponse:
     init_date = req.header_params.get('init_date')
     end_date = req.header_params.get('end_date')
