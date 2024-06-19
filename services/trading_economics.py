@@ -2,13 +2,10 @@ import time
 import tradingeconomics as te
 import pandas as pd
 from utils.dates import get_year_windows
-from utils.system import get_trading_economics_api_key, get_fred_api_key
+from utils.system import get_trading_economics_api_key
 import logging
 
-fred_api_key = get_fred_api_key()
-
 te.login(get_trading_economics_api_key())
-
 
 
 def get_indicator_historical(indicator_symbol, init_date, end_date):
