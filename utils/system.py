@@ -4,8 +4,12 @@ from os import environ
 
 DEFAULT_INIT_DATE = environ.get('TRADING_ECONOMICS_HISTORICAL_INIT_DATE', '1964-12-30')
 
+
 def get_trading_economics_api_key():
     return get_secret('TRADING-ECONOMICS-API-KEY')
+
+def get_fred_api_key():
+    return get_secret('FRED-API-KEY')
 
 def get_trading_economics_indicators_to_request():
     try:

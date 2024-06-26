@@ -28,11 +28,10 @@ def get_file_from_datalake(file_name, file_folder):
     except:
         return None
 
-def copy_file_to_target_datalake(file_binary, file_name, file_folder):
-    file_path = environ.get("DATALAKE_TARGET_BASE_FOLDER")
+def copy_file_to_target_datalake(file_binary, file_name, file_folder,datalake_target_base_folder):   
     file_target_system = environ.get('DATALAKE_TARGET_CONTAINER_NAME')
     file_taget_system_client = service_client.get_file_system_client(file_target_system)
-    file_name_and_folder = [file_path, file_folder, file_name]
+    file_name_and_folder = [datalake_target_base_folder, file_folder, file_name]
     file_target_client = file_taget_system_client.get_file_client('/'.join(filter(None, file_name_and_folder)))
     if file_target_client.exists():
         file_target_client.delete_file()

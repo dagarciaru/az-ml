@@ -1,3 +1,4 @@
+import logging
 from unittest import TestCase
 from unittest.mock import patch
 import pandas as pd
@@ -5,7 +6,7 @@ from pandas.testing import assert_frame_equal
 
 patch('tradingeconomics.login').start()
 patch('azure.keyvault.secrets.SecretClient').start()
-from services.trading_economics import get_indicator_historical, get_indicator_info, get_indicators_info
+from services.trading_economics import get_indicator_historical, get_indicators_info, get_indicator_historical_fred_series
 from tests.test_utils.indicators import get_mock_indicator_historical_dataframe, get_mock_indicator
 
 class TestTradingEconomics(TestCase):
@@ -66,26 +67,6 @@ class TestTradingEconomics(TestCase):
         assert_frame_equal(dataframe, pd.DataFrame())
 
     @patch('tradingeconomics.getMarketsBySymbol')
-    def test_get_indicator_info_not_found(self, mock_getMarketsBySymbol):
-        mock_getMarketsBySymbol.return_value = None
-
-        symbol_info = get_indicator_info('Symbol')
-
-        self.assertEqual(symbol_info, None)
-        mock_getMarketsBySymbol.assert_called_once_with(symbols = ['Symbol'])
-    
-    @patch('tradingeconomics.getMarketsBySymbol')
-    def test_get_indicator_info_found(self, mock_getMarketsBySymbol):
-        expected_indicator_info = get_mock_indicator()
-        mock_getMarketsBySymbol.return_value = [expected_indicator_info]
-
-        symbol_info = get_indicator_info(expected_indicator_info['Symbol'])
-
-        self.assertEqual(symbol_info, expected_indicator_info)
-        mock_getMarketsBySymbol.assert_called_once_with(symbols = [expected_indicator_info['Symbol']])
-
-
-    @patch('tradingeconomics.getMarketsBySymbol')
     def test_get_indicators_info_not_found(self, mock_getMarketsBySymbol):
         mock_getMarketsBySymbol.return_value = None
 
@@ -110,3 +91,28 @@ class TestTradingEconomics(TestCase):
 
         self.assertEqual(symbol_info, expected_indicators_info)
         mock_getMarketsBySymbol.assert_called_once_with(symbols = expected_indicators_symbols)
+
+    @patch('fredapi.Fred.get_series')
+    def test_get_indicator_historical_fred_series(self, mock_get_series):
+        
+        mock_series = pd.DataFrame({
+            'date': ['2023-08-02', '2023-08-09', '2023-08-16'],
+            'value': [889.403, 890.443, 889.357]
+        }).set_index('date')
+        
+        mock_get_series.return_value = mock_series
+
+
+        result = get_indicator_historical_fred_series('CRELCBW027NBOG', '2023-08-01', '2023-08-17')
+        
+
+        expected_df = pd.DataFrame({
+            'Symbol': ['CRELCBW027NBOG', 'CRELCBW027NBOG', 'CRELCBW027NBOG'],
+            'Date': ['2023-08-02', '2023-08-09', '2023-08-16'],
+            'Value': [889.403, 890.443, 889.357]
+        })
+
+        
+        mock_get_series.assert_called_once_with('CRELCBW027NBOG', observation_start='2023-08-01', observation_end='2023-08-17')
+
+        assert_frame_equal(result, expected_df)
