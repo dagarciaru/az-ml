@@ -8,7 +8,7 @@ import logging
 from validations.validators.http_validator import validate, ValidationType
 from validations.models.get_indicators import GetHistoricalHeaders, GetPathParam, GetDailyHeaders
 from utils.system import get_filename, get_trading_economics_indicators_to_request
-from utils.dataframes import get_dataframe, save_dataframe, update_dataframe, sort_dataframe_by_date
+from utils.dataframes import get_dataframe, save_dataframe, update_dataframe, sort_update_dataframe_by_date
 from utils.exceptions import IndicatorException
 from services.datalake import copy_file_to_target_datalake
 from utils.dataframes import convert_to_in_memory_parquet
@@ -26,14 +26,33 @@ def get_historical_indicators(indicators, init_date, end_date):
         print(indicator_symbol, indicator_path)
 
         logging.info(f"Requesting indicator close price for {indicator_symbol} from {init_date} to {end_date}")
-        dataframe = get_indicator_historical(indicator_symbol, init_date, end_date)
+        dataframe_result = get_indicator_historical(indicator_symbol, init_date, end_date)
+        date_column = None
+        date_format = None
+               
+        logging.info(f"Sort columns {dataframe_result.columns } valet to sort")
+
+        if 'DateTime' in dataframe_result.columns:
+            date_column = 'DateTime'
+            date_format = '%Y-%m-%dT%H:%M:%S'
+        elif 'Date' in dataframe_result.columns:
+            date_column = 'Date'
+            date_format = '%d/%m/%Y'
+        if date_column:
+            logging.info(f"Sort column idicator {date_column} valet to sort")
+            logging.info(f"Format  {date_format} ")
+            sorted_dataframe = sort_update_dataframe_by_date(dataframe_result, date_column, format=date_format)            
+        else:
+            print("No date column found in the DataFrame.")
+
+       
 
         file_name = get_filename(prefix = 'TRADING_ECONOMICS', name = indicator_symbol, ext= "parquet")
 
         logging.info(f"Saving changes into parquet file {file_name}")
-        save_dataframe(dataframe, file_name, indicator_path)
+        save_dataframe(sorted_dataframe, file_name, indicator_path)
 
-        file_binary = convert_to_in_memory_parquet(dataframe)
+        file_binary = convert_to_in_memory_parquet(sorted_dataframe)
        
         copy_file_to_target_datalake(file_binary, file_name, indicator_path,file_economics_path)
 
@@ -47,15 +66,29 @@ def get_daily_indicators(indicators, request_date):
         logging.info(f'Retrieving parquet {file_name} from Datalake')
         datalake_dataframe = get_dataframe(file_name, indicator_path)
 
+        date_column = None
+        date_format = None
+
         logging.info(f"Requesting indicator close price for {indicator_symbol} at date {request_date}")
         results_dataframe = get_indicator_historical(indicator_symbol, request_date, request_date)
 
         logging.info(f"Got indicator {results_dataframe.to_string()}")
+        date_column = 'Date' if 'Date' in datalake_dataframe.columns else 'DateTime'
 
         logging.info(f"Updating {file_name} parquet with new data")
-        updated_dataframe = update_dataframe(datalake_dataframe, results_dataframe, 'Date')
 
-        sorted_dataframe = sort_dataframe_by_date(updated_dataframe, 'Date')
+        logging.info(f"Sort {date_column} valet to sort")
+
+        if 'DateTime' in datalake_dataframe.columns:
+            date_column = 'DateTime'
+            date_format = '%Y-%m-%dT%H:%M:%S'
+        elif 'Date' in datalake_dataframe.columns:
+            date_column = 'Date'
+            date_format = '%d/%m/%Y'
+       
+        updated_dataframe = update_dataframe(datalake_dataframe, results_dataframe, date_column)
+        
+        sorted_dataframe = sort_update_dataframe_by_date(updated_dataframe, date_column, format=date_format)
         logging.info(f"Got a new parquet with {len(updated_dataframe)} rows")
 
         logging.info(f"Saving changes into parquet file {file_name}")

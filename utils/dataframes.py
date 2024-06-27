@@ -22,7 +22,7 @@ def save_dataframe(dataframe, file_name, file_path = None):
     file_binary = convert_to_in_memory_parquet(dataframe)
     send_file_to_datalake(file_binary, file_name, file_path)
     
-def sort_dataframe_by_date(df, reference_column, format='%d/%m/%Y'):
+def sort_update_dataframe_by_date(df, reference_column, format='%d/%m/%Y'):
     sort_column = f"{reference_column}_sort"
     df[sort_column] = pd.to_datetime(df[reference_column], format=format)
     dataframe_sorted = df.sort_values(by=sort_column)
