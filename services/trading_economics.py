@@ -24,7 +24,12 @@ def get_indicator_historical(indicator_symbol, init_date, end_date):
             dataframes.append(dataframe)
         time.sleep(1.5)
     if len(dataframes) > 0:
-        return pd.concat(dataframes)
+        combined_df = pd.concat(dataframes)
+        combined_df['DateTime'] = pd.to_datetime(combined_df['DateTime'])  
+        combined_df = combined_df.sort_values(by='DateTime')  
+        combined_df['DateTime'] = combined_df['DateTime'].dt.strftime('%Y-%m-%dT%H:%M:%S')  
+        return combined_df
+    
     return pd.DataFrame()
 
 def get_indicators_info(indicators_symbols):
