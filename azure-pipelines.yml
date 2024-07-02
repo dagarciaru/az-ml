@@ -11,7 +11,7 @@ pr:
       - dev
 
 variables:
-  - group: var-group-finaipro-cosmos-dev
+  - group: var-group-finaipro-azf-dev
 
 pool: Azure Pipelines
 
@@ -31,8 +31,19 @@ stages:
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)'
-        artifact: 'Cosmos Artifact'
+        artifact: 'AzureFunctionArtifact'
         publishLocation: 'Pipeline'
+
+- stage: Test
+  displayName: 'Test Stage'
+  jobs:
+  - job: Test
+    displayName: 'Test Job'
+    steps:
+    - script: |
+        echo "Running tests..."
+        dotnet test --configuration Release --no-build
+      displayName: 'Run unit tests'
 
 - stage: Deploy
   displayName: 'Deploy Stage'
@@ -41,7 +52,7 @@ stages:
     displayName: 'Deploy Job'
     steps:
     - download: current
-      artifact: 'Cosmos Artifact'
+      artifact: 'AzureFunctionArtifact'
     
     - task: AzureFunctionApp@1
       displayName: 'Deploy to Azure Function App'
@@ -49,5 +60,4 @@ stages:
         azureSubscription: $(AZURE_SERVICE_CONNECTION)
         appType: functionAppLinux
         appName: 'azf-finaipro-dev2-eu02'
-        package: '$(Pipeline.Workspace)/Cosmos Artifact/http_triggers'
-
+        package: '$(Pipeline.Workspace)/AzureFunctionArtifact'
