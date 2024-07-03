@@ -6,7 +6,7 @@ from pandas.testing import assert_frame_equal
 
 patch('tradingeconomics.login').start()
 patch('azure.keyvault.secrets.SecretClient').start()
-from services.trading_economics import get_indicator_historical, get_indicators_info, get_indicator_historical_fred_series
+from services.trading_economics import get_indicator_historical, get_indicator_historical_fred_series
 from tests.test_utils.indicators import get_mock_indicator_historical_dataframe, get_mock_indicator
 
 class TestTradingEconomics(TestCase):
@@ -65,32 +65,6 @@ class TestTradingEconomics(TestCase):
 
         self.assertEqual(len(dataframe), 0)
         assert_frame_equal(dataframe, pd.DataFrame())
-
-    @patch('tradingeconomics.getMarketsBySymbol')
-    def test_get_indicators_info_not_found(self, mock_getMarketsBySymbol):
-        mock_getMarketsBySymbol.return_value = None
-
-        symbol_info = get_indicators_info(['no-found-symbol'])
-
-        self.assertEqual(symbol_info, None)
-        mock_getMarketsBySymbol.assert_called_once_with(symbols = ['no-found-symbol'])
-
-    @patch('tradingeconomics.getMarketsBySymbol')
-    def test_get_indicators_info_found(self, mock_getMarketsBySymbol):
-        expected_indicators_info = [
-            get_mock_indicator(),
-            get_mock_indicator()
-        ]
-        expected_indicators_symbols = [
-            expected_indicators_info[0]['Symbol'],
-            expected_indicators_info[1]['Symbol']
-        ]
-        mock_getMarketsBySymbol.return_value = expected_indicators_info
-        
-        symbol_info = get_indicators_info(expected_indicators_symbols)
-
-        self.assertEqual(symbol_info, expected_indicators_info)
-        mock_getMarketsBySymbol.assert_called_once_with(symbols = expected_indicators_symbols)
 
     @patch('fredapi.Fred.get_series')
     def test_get_indicator_historical_fred_series(self, mock_get_series):
