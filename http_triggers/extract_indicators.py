@@ -81,8 +81,7 @@ def get_daily_indicators(indicators, request_date):
 
         logging.info(f"Got indicator {results_dataframe.to_string()}")
         logging.info(f"Got indicator {results_dataframe.columns}")
-        #date_column = 'Date' if 'Date' in results_dataframe.columns else 'DateTime'
-
+       
         logging.info(f"Updating {file_name} parquet with new data")
 
        
@@ -169,7 +168,6 @@ def extract_indicator_daily(req: func.HttpRequest) -> func.HttpResponse:
     request_date = req.header_params.get('indicator_date')
     indicator_symbol = req.path_params.get('symbol')
     
-    indicators = get_trading_economics_indicators_to_request()
     indicators = get_trading_economics_indicators_to_request()
     if indicator_symbol not in indicators:
         raise IndicatorException(f'{indicator_symbol} was not found', status_code=404)
