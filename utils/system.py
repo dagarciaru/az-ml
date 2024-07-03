@@ -12,7 +12,7 @@ def get_fred_api_key():
     return get_secret('FRED-API-KEY')
 
 def get_trading_economics_indicators_to_request():
-    try:
+    try:       
         return json.loads(get_secret('TRADING-ECONOMICS-INDICATORS'))
     except Exception as e:
         return []
@@ -25,3 +25,5 @@ def get_filename(**kwargs):
     filename = '_'.join(filter(lambda var: var is not None and var != '', [prefix, name, postfix]))
     filename = filename.replace(':', '_')
     return f"{filename}.{ext.replace('.', '')}"
+
+
